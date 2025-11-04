@@ -51,9 +51,11 @@ toy/
     ├── Fifo.py            # HwModule: FIFO（协程版，内部使用RAM）
     ├── SimpleALU.py       # HwModule: ALU（协程版，内部使用FIFO）
     └── main.py            # 【关键】: 纯Python的Testbench和仿真主程序
-
+```
 ## 示例硬件架构
+
 `test/`文件夹中的文件共同构建了一个3层结构的、用于演示的硬件系统：
+
 1.  **`SimpleALU` (顶层硬件)**:
     * 这是一个ALU（算术逻辑单元）的“容器”模块。它本身不存储数据。
     * 它在内部创建并拥有**两个**`Fifo`子模块（`fifo0`和`fifo1`），分别用于两个操作数。
