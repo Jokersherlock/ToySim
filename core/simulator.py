@@ -8,6 +8,36 @@ from typing import Callable, Any, List, Dict, Generator, Optional
 # 从同一个目录导入 Event
 from .event import Event
 
+class WaitSignal:
+    """协程 yield 出来的“等待某个 signal”的指令"""
+    def __init__(self, signal: "Signal"):
+        self.signal = signal
+
+
+class Signal:
+    """一个最小可用的事件/条件通知器"""
+    def __init__(self, sim: "Simulator"):
+        self.sim = sim
+        self.waiting_tasks = []
+
+    def wait(self) -> WaitSignal:
+        """给等待方用：yield signal.wait()"""
+        return WaitSignal(self)
+
+    def notify_one(self, value=None):
+        """唤醒一个等待者"""
+        if self.waiting_tasks:
+            task = self.waiting_tasks.pop(0)
+            self.sim._schedule_task_now(task, with_value=value)
+
+    def notify_all(self, value=None):
+        """唤醒所有等待者"""
+        waiters = self.waiting_tasks
+        self.waiting_tasks = []
+        for task in waiters:
+            self.sim._schedule_task_now(task, with_value=value)
+
+
 # ==============================================================================
 # “指令”类：HwModule 和 Testbench 将 yield 这些对象
 # ==============================================================================
@@ -187,6 +217,10 @@ class Simulator:
         elif isinstance(yielded_value, list):
             # 指令4: "results = yield [handle_a, handle_b]"
             join_barrier = JoinBarrier(self, yielded_value, parent=task)
+
+        elif isinstance(yielded_value, WaitSignal):
+        # 新增：等待某个 signal，被 notify 时再恢复
+            yielded_value.signal.waiting_tasks.append(task)
             
         elif yielded_value is None:
             # 指令5: "yield"

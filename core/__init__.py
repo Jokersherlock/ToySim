@@ -31,10 +31,10 @@
 """
 
 from .event import Event
-from .simulator import Simulator, Delay, Task
+from .simulator import Simulator, Delay, Task, Signal, WaitSignal
 from .hw_module import HwModule
 
 __version__ = "1.0.0"
 __author__ = "PQC_DSS Project"
 
-__all__ = ["Event", "Simulator", "HwModule", "Delay", "Task"]
+__all__ = ["Event", "Simulator", "HwModule", "Delay", "Task", "Signal", "WaitSignal"]
